@@ -1,11 +1,13 @@
 pipeline {
     agent any
-  
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWSCredentails-test')
+        AWS_ACCESS_KEY_ID = credentials('AWSCredentails-test')
         AWS_SECRET_ACCESS_KEY = credentials('AWSCredentails-test')
         AWS_REGION = 'us-east-1'
-        TF_IN_AUTOMATION      = '1'
+    }
+
+    parameters {
+        booleanParam(name: 'applyOrDestroy', defaultValue: true, description: 'Apply (true) or Destroy (false) resources?')
     }
 
     stages {
@@ -23,22 +25,33 @@ pipeline {
         stage('Approval') {
             when {
                 not {
-                    equals expected: true, actual: params.autoApprove
+                    expression {
+                        params.autoApprove || params.applyOrDestroy
+                    }
                 }
             }
 
             steps {
                 script {
                     def plan = readFile 'tfplan.txt'
-                    input message: "Do you want to apply the plan?",
+                    input message: "Review the plan and confirm:",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                 }
             }
         }
 
-        stage('Apply') {
+        stage('Apply/Destroy') {
+            when {
+                expression {
+                    params.autoApprove || params.applyOrDestroy
+                }
+            }
+
             steps {
-                sh "terraform apply -input=false tfplan"
+                script {
+                    def command = "terraform ${params.applyOrDestroy ? 'apply' : 'destroy'} -input=false tfplan"
+                    sh command
+                }
             }
         }
     }
