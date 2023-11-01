@@ -7,7 +7,7 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'applyOrDestroy', defaultValue: true, description: 'Apply (true) or Destroy (false) resources?')
+        choice(name: 'applyOrDestroyChoice', choices: 'Apply\nDestroy', description: 'Select Apply or Destroy')
     }
 
     stages {
