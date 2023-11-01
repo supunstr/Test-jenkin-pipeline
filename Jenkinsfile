@@ -49,7 +49,7 @@ pipeline {
 
             steps {
                 script {
-                    def command = "terraform ${params.applyOrDestroy ? 'apply' : 'destroy'} -input=false tfplan"
+                    def command = "terraform ${params.applyOrDestroyChoice ? 'apply' : 'destroy'} -input=false tfplan"
                     sh command
                 }
             }
