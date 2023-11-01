@@ -1,11 +1,30 @@
 pipeline {
-    agent any  // This means the pipeline can run on any available agent/executor.
+    agent any
 
     stages {
-        stage('Hello') {
+        stage('Checkout') {
             steps {
-                echo 'Hello, World!'  // This step just prints "Hello, World!" to the console.
+                checkout scm
             }
+        }
+
+        stage('Terraform Init') {
+              steps {
+        withAWS(credentials: 'sam-jenkins-demo-credentials', region: 'us-west-2') {
+          sh 'aws s3 ls'
+        }
+      }
+    }
+
+        // Additional stages for Terraform Plan, Apply, etc.
+    }
+
+    post {
+        success {
+            // Add post-build actions or notifications on success
+        }
+        failure {
+            // Add post-build actions or notifications on failure
         }
     }
 }
