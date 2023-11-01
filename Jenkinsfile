@@ -26,7 +26,7 @@ pipeline {
             when {
                 not {
                     expression {
-                        params.autoApprove || params.applyOrDestroy
+                        params.autoApprove || params.applyOrDestroyChoice == 'Apply'
                     }
                 }
             }
@@ -43,13 +43,13 @@ pipeline {
         stage('Apply/Destroy') {
             when {
                 expression {
-                    params.autoApprove || params.applyOrDestroy
+                    params.autoApprove || params.applyOrDestroyChoice == 'Apply'
                 }
             }
 
             steps {
                 script {
-                    def command = "terraform ${params.applyOrDestroyChoice ? 'apply' : 'destroy'} -input=false tfplan"
+                    def command = "terraform ${params.applyOrDestroyChoice == 'Apply' ? 'apply' : 'destroy'} -input=false tfplan"
                     sh command
                 }
             }
