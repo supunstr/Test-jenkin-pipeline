@@ -7,9 +7,10 @@ pipeline {
                 checkout scm
             }
         }
+    }
 
 //        stage('Terraform Init') {
-              steps {
+ //             steps {
       //  withAWS(credentials: 'AWSCredentails-test', region: 'us-west-2') {
       //    sh 'aws s3 ls'
 //           echo 'Hello World'
@@ -25,5 +26,5 @@ pipeline {
     }
 
         // Additional stages for Terraform Plan, Apply, etc.
-    }
+
 }
