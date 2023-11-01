@@ -1,22 +1,75 @@
+//pipeline {
+//    agent any
+//    environment {
+//    AWS_ACCESS_KEY_ID = credentials('AWSCredentails-test')
+//    AWS_SECRET_ACCESS_KEY = credentials('AWSCredentails-test')
+//    AWS_REGION = 'us-east-1'
+//}
+ //   stages {
+ //       stage('Hello') {
+ //           steps {
+  //              echo 'Hello World'
+  //          }
+  //      }
+  //      stage('test') {
+  //          steps {
+             //   withAWS(region: env.AWS_REGION, credentials: 'AWSCredentails-test') {
+    //                sh 'aws s3 ls'
+              //  }
+  //          }
+  //      }
+   // }
+//}
+
+
 pipeline {
     agent any
+  
     environment {
-    AWS_ACCESS_KEY_ID = credentials('AWSCredentails-test')
-    AWS_SECRET_ACCESS_KEY = credentials('AWSCredentails-test')
-    AWS_REGION = 'us-east-1'
-}
+        AWS_ACCESS_KEY_ID     = credentials('AWSCredentails-test')
+        AWS_SECRET_ACCESS_KEY = credentials('AWSCredentails-test')
+        AWS_REGION = 'us-east-1'
+        TF_IN_AUTOMATION      = '1'
+    }
+
     stages {
-        stage('Hello') {
+        stage('Plan') {
             steps {
-                echo 'Hello World'
+                script {
+                    currentBuild.displayName = params.version
+                }
+                sh 'terraform init -input=false'
+                sh "terraform plan -input=false -out tfplan"
+                sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        stage('test') {
-            steps {
-             //   withAWS(region: env.AWS_REGION, credentials: 'AWSCredentails-test') {
-                    sh 'aws s3 ls'
-              //  }
+
+        stage('Approval') {
+            when {
+                not {
+                    equals expected: true, actual: params.autoApprove
+                }
             }
+
+            steps {
+                script {
+                    def plan = readFile 'tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                        parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                }
+            }
+        }
+
+        stage('Apply') {
+            steps {
+                sh "terraform apply -input=false tfplan"
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'tfplan.txt'
         }
     }
 }
