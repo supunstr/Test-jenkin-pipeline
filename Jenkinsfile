@@ -8,13 +8,20 @@ pipeline {
             }
         }
 
-        stage('Terraform Init') {
+//        stage('Terraform Init') {
               steps {
       //  withAWS(credentials: 'AWSCredentails-test', region: 'us-west-2') {
       //    sh 'aws s3 ls'
-           echo 'Hello World'
+//           echo 'Hello World'
+//        }
+//      }
+//    }
+        stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
         }
-      }
     }
 
         // Additional stages for Terraform Plan, Apply, etc.
