@@ -9,7 +9,7 @@ pipeline {
         stage('test') {
             steps {
                 withAWS(credentials: 'AWSCredentails-test', region: 'us-west-2') {
-                    aws s3 ls
+                    sh 'aws s3 ls'
                 }
             }
         }
