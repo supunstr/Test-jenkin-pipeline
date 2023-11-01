@@ -1,14 +1,13 @@
 pipeline {
     agent any
     environment {
-        AWS_ACCESS_KEY_ID = credentials('AWSCredentials-test')
-        AWS_SECRET_ACCESS_KEY = credentials('AWSCredentials-test')
+        AWS_ACCESS_KEY_ID = credentials('AWSCredentails-test')
+        AWS_SECRET_ACCESS_KEY = credentials('AWSCredentails-test')
         AWS_REGION = 'us-east-1'
     }
 
     parameters {
         choice(name: 'applyOrDestroyChoice', choices: 'Apply\nDestroy', description: 'Select Apply or Destroy')
-        booleanParam(name: 'reviewPlan', defaultValue: false, description: 'Review the Terraform plan before applying or destroying')
     }
 
     stages {
@@ -25,8 +24,10 @@ pipeline {
 
         stage('Approval') {
             when {
-                expression {
-                    params.reviewPlan && params.applyOrDestroyChoice == 'Apply'
+                not {
+                    expression {
+                        params.autoApprove || params.applyOrDestroyChoice == 'Apply'
+                    }
                 }
             }
 
@@ -42,7 +43,7 @@ pipeline {
         stage('Apply/Destroy') {
             when {
                 expression {
-                    params.applyOrDestroyChoice == 'Apply'
+                    params.autoApprove || params.applyOrDestroyChoice == 'Apply'
                 }
             }
 
@@ -52,6 +53,12 @@ pipeline {
                     sh command
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'tfplan.txt'
         }
     }
 }
