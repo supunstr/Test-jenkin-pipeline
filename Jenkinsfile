@@ -13,7 +13,7 @@ pipeline {
         }
         stage('test') {
             steps {
-                withAWS(region: env.AWS_REGION, credentials: 'AWSCredentails-test') {
+             //   withAWS(region: env.AWS_REGION, credentials: 'AWSCredentails-test') {
                     sh 'aws s3 ls'
                 }
             }
