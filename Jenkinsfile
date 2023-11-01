@@ -54,10 +54,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
-            archiveArtifacts artifacts: 'tfplan.txt'
-        }
-    }
 }
